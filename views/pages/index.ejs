@@ -1,0 +1,11 @@
+<div>
+    <% if (auth) { %>
+        <h2><%= auth.first_name %></h2>
+    <% } %>
+
+    <%- data.session %>
+
+    <form action="/logout" method="post">
+        <button type="submit">Выход</button>
+    </form>
+</div>

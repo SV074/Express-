@@ -1,0 +1,11 @@
+<div>
+    <ul>
+        <% users.forEach((user) => { %>
+            <li>
+            <div>ID: <%- user.id  %></div>
+            <div>Имя: <%- user.first_name + ' ' + user.last_name  %></div>
+            <div>Email: <%- user.email  %></div>
+            </li>
+        <% }); %>
+    </ul>
+</div>
