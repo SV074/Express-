@@ -38,7 +38,7 @@ let users = [
 //     })
 // }
 
-// Функция записси юзера
+// Функция записи юзера
 function writeUsers(data) {
     fs.writeFileSync(`${__dirname}/users.json`, JSON.stringify(data), (err) => {
         if (err) throw err;
@@ -64,16 +64,16 @@ app.post('/users/create', async (request, response) => {
 
     let users = getUsers();    
 
-    let lastId = 
+    // let lastId = 
 
     users.push({
-        id: Math.max.apply(Math, users.map(function(o) { return o.id + 1; })),
+        id: request.body.id,
         name: request.body.name
     })
-
+    //Math.max.apply(Math, users.map(function(o) { return o.id + 1; }))
     writeUsers(users);
 
-    // response.send(foo);
+    response.send(foo);
 });
 
 
@@ -89,5 +89,5 @@ app.get('/users', (req, res) => {
 
 
 app.listen(80, () => {
-    console.log('Application listening on port 3333!');
+    console.log('Application listening on port 80!');
 });
