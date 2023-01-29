@@ -7,10 +7,11 @@ import fs from 'fs';
 import bodyParser from 'body-parser';
 import sha256 from 'sha256';
 import * as process from 'process';
-import cookieParser  from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import sessionFileStore from 'session-file-store';
 import uuid from 'node-uuid';
+import cors from 'cors';
 
 const port = process.env.PORT;
 const host = process.env.HOST_URL;
@@ -20,6 +21,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('./public'));
 app.use(cookieParser());
+
+app.use(cors());
 
 let SessionFileStore = sessionFileStore(session);
 
@@ -66,8 +69,20 @@ function getDataFromTable(name) {
     return JSON.parse(fileContent);
 }
 
-function addToTable(name, data, idIncrement = true)
-{
+// function addToTable(name, data, idIncrement = true) {
+//     let currentData = getDataFromTable(name);
+
+//     if (idIncrement) {
+//         let lastId = getLastIdFromObjectArray(currentData);
+//         data.id = ++lastId;
+//     }
+
+//     currentData.push(data);
+
+//     writeToTable(name, currentData);
+// }
+
+function addToTable(name, data, idIncrement = true) {
     let currentData = getDataFromTable(name);
 
     if (idIncrement) {
@@ -78,10 +93,11 @@ function addToTable(name, data, idIncrement = true)
     currentData.push(data);
 
     writeToTable(name, currentData);
+
+    return data.id;
 }
 
-function deleteFromTable(name, param, value)
-{
+function deleteFromTable(name, param, value) {
     let currentData = getDataFromTable(name);
 
     currentData = currentData.filter((item) => {
@@ -244,6 +260,82 @@ app.post('/logout', (req, res) => {
         res.send('Вы не авторизированы.');
     }
 });
+
+app.post('/todolists/create', (req, res) => {
+    const data = req.body;
+    
+
+    const task = addToTable('tasks', {
+        name: data.todo,
+        checked: false,
+        important:false,
+        
+    });
+
+    
+    const allTasks = getDataFromTable('tasks');
+    const neededTask = getItemByParamValue(allTasks, 'id', task);
+    
+    res.status(200).json(neededTask);
+});
+
+
+app.get('/todolists', (req, res) => {
+    const data = getDataFromTable('tasks');
+    res.status(200).json(data);
+})
+
+app.put('/todolists/:id/checked', (req, res) => {
+    const id = +req.params.id;
+    const task = req.body;
+    const allTasks = getDataFromTable('tasks');
+    const neededTask = getItemByParamValue(allTasks, 'id', id);
+    const index = allTasks.findIndex(element => element.id === id);
+    let updateTask = { ...neededTask, ...task};
+    allTasks[index] = updateTask;
+    writeToTable('tasks', allTasks);
+    
+    res.status(200).json({updateTask});
+    
+    // res.status(200).json({ message: "Update"});
+})
+
+app.put('/todolists/:id/unchecked', (req, res) => {
+    const id = +req.params.id;
+    const task = req.body;
+    const allTasks = getDataFromTable('tasks');
+    const neededTask = getItemByParamValue(allTasks, 'id', id);
+    const index = allTasks.findIndex(element => element.id === id);
+    let updateTask = { ...neededTask, ...task};
+    allTasks[index] = updateTask;
+    const data = writeToTable('tasks', allTasks);
+    
+    res.status(200).json({neededTask});
+    
+    // res.status(200).json({ message: "Update"});
+})
+
+app.delete('/todolists', (req, res) => {
+    const data = deleteFromTable('tasks');
+    res.status(200).json({ message: "Clear"});
+})
+
+
+
+app.delete('/todolists/:id', (req, res) => {
+
+    const id = +req.params.id;
+    const allTasks = getDataFromTable('tasks');
+    const neededTask = getItemByParamValue(allTasks, 'id', id);
+
+    if (neededTask) {
+        const data = deleteFromTable('tasks', 'id', +req.params.id);
+        res.status(200).json(neededTask);
+    } else {
+        res.status(404).json({message: "Error"});
+    }
+   
+})
 
 app.get('/', (req, res) => {
     return view(
