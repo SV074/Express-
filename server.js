@@ -263,19 +263,18 @@ app.post('/logout', (req, res) => {
 
 app.post('/todolists/create', (req, res) => {
     const data = req.body;
-    
-
     const task = addToTable('tasks', {
         name: data.todo,
+        info: data.info,
+        date: data.dateTaskAdd,
         checked: false,
-        important:false,
-        
+        important: false,
+        reminder: data.reminderTask,
     });
 
-    
     const allTasks = getDataFromTable('tasks');
     const neededTask = getItemByParamValue(allTasks, 'id', task);
-    
+
     res.status(200).json(neededTask);
 });
 
@@ -283,6 +282,31 @@ app.post('/todolists/create', (req, res) => {
 app.get('/todolists', (req, res) => {
     const data = getDataFromTable('tasks');
     res.status(200).json(data);
+})
+
+app.get('/todolists/done', (req, res) => {
+    const data = getDataFromTable('tasks');
+    res.status(200).json(data);
+})
+
+app.get('/todolists/reminder', (req, res) => {
+    const data = getDataFromTable('tasks');
+    res.status(200).json(data);
+})
+
+app.put('/todolists/:id/check-status', (req, res) => {
+    const id = +req.params.id;
+    const task = req.body;
+    const allTasks = getDataFromTable('tasks');
+    const neededTask = getItemByParamValue(allTasks, 'id', id);
+    const index = allTasks.findIndex(element => element.id === id);
+    let updateTask = { ...neededTask, ...task};
+    allTasks[index] = updateTask;
+    writeToTable('tasks', allTasks);
+    
+    res.status(200).json({updateTask});
+    
+    // res.status(200).json({ message: "Update"});
 })
 
 app.put('/todolists/:id/checked', (req, res) => {
@@ -308,12 +332,41 @@ app.put('/todolists/:id/unchecked', (req, res) => {
     const index = allTasks.findIndex(element => element.id === id);
     let updateTask = { ...neededTask, ...task};
     allTasks[index] = updateTask;
-    const data = writeToTable('tasks', allTasks);
+    writeToTable('tasks', allTasks);
     
-    res.status(200).json({neededTask});
+    res.status(200).json({updateTask});
     
     // res.status(200).json({ message: "Update"});
 })
+
+app.put('/todolists/:id/edit', (req,res) => {
+    const id = +req.params.id;
+    const task = req.body;
+    const allTasks = getDataFromTable('tasks');
+    const neededTask = getItemByParamValue(allTasks, 'id', id);
+    const index = allTasks.findIndex(element => element.id === id);
+    let editTask = { ...neededTask, ...task};
+    allTasks[index] = editTask;
+    const data = writeToTable('tasks', allTasks);
+
+     res.status(200).json({editTask});
+})
+
+app.put('/todolists/:id/change-important-status', (req,res) => {
+    const id = +req.params.id;
+    const task = req.body;
+    const allTasks = getDataFromTable('tasks');
+    const neededTask = getItemByParamValue(allTasks, 'id', id);
+    const index = allTasks.findIndex(element => element.id === id);
+    let updateTask = { ...neededTask, ...task};
+    allTasks[index] = updateTask;
+    const sortTasks = allTasks.sort((a, b) => 
+    b.important - a.important);
+    const data = writeToTable('tasks', allTasks);
+    
+    res.status(200).json({updateTask});
+})
+
 
 app.delete('/todolists', (req, res) => {
     const data = deleteFromTable('tasks');
