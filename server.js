@@ -267,7 +267,7 @@ app.post('/todolists/create', (req, res) => {
         name: data.todo,
         info: data.info,
         date: data.dateTaskAdd,
-        checked: false,
+        completed: false,
         important: false,
         reminder: data.reminderTask,
     });
@@ -289,42 +289,16 @@ app.get('/todolists/done', (req, res) => {
     res.status(200).json(data);
 })
 
-app.get('/todolists/reminder', (req, res) => {
+app.get('/todolists/active', (req, res) => {
+    // const allTasks = getDataFromTable('tasks');
+    // const data = allTasks.filter(element => element.date === element.reminder);
+    // let data = allTasks[index];
+    // writeToTable('tasks', allTasks);
     const data = getDataFromTable('tasks');
     res.status(200).json(data);
 })
 
-app.put('/todolists/:id/check-status', (req, res) => {
-    const id = +req.params.id;
-    const task = req.body;
-    const allTasks = getDataFromTable('tasks');
-    const neededTask = getItemByParamValue(allTasks, 'id', id);
-    const index = allTasks.findIndex(element => element.id === id);
-    let updateTask = { ...neededTask, ...task};
-    allTasks[index] = updateTask;
-    writeToTable('tasks', allTasks);
-    
-    res.status(200).json({updateTask});
-    
-    // res.status(200).json({ message: "Update"});
-})
-
-app.put('/todolists/:id/checked', (req, res) => {
-    const id = +req.params.id;
-    const task = req.body;
-    const allTasks = getDataFromTable('tasks');
-    const neededTask = getItemByParamValue(allTasks, 'id', id);
-    const index = allTasks.findIndex(element => element.id === id);
-    let updateTask = { ...neededTask, ...task};
-    allTasks[index] = updateTask;
-    writeToTable('tasks', allTasks);
-    
-    res.status(200).json({updateTask});
-    
-    // res.status(200).json({ message: "Update"});
-})
-
-app.put('/todolists/:id/unchecked', (req, res) => {
+app.put('/todolists/:id/completed-status', (req, res) => {
     const id = +req.params.id;
     const task = req.body;
     const allTasks = getDataFromTable('tasks');
@@ -353,6 +327,7 @@ app.put('/todolists/:id/edit', (req,res) => {
 })
 
 app.put('/todolists/:id/change-important-status', (req,res) => {
+    console.log(2);
     const id = +req.params.id;
     const task = req.body;
     const allTasks = getDataFromTable('tasks');
@@ -376,7 +351,7 @@ app.delete('/todolists', (req, res) => {
 
 
 app.delete('/todolists/:id', (req, res) => {
-
+    console.log(4);
     const id = +req.params.id;
     const allTasks = getDataFromTable('tasks');
     const neededTask = getItemByParamValue(allTasks, 'id', id);
