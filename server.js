@@ -266,10 +266,10 @@ app.post('/todolists/create', (req, res) => {
     const task = addToTable('tasks', {
         name: data.todo,
         info: data.info,
-        date: data.dateTaskAdd,
+        created_at: data.dateTaskAdd,
         completed: false,
         important: false,
-        reminder: data.reminderTask,
+        actual_date: data.actualDate,
     });
 
     const allTasks = getDataFromTable('tasks');
@@ -284,20 +284,6 @@ app.get('/todolists', (req, res) => {
     res.status(200).json(data);
 })
 
-app.get('/todolists/done', (req, res) => {
-    const data = getDataFromTable('tasks');
-    res.status(200).json(data);
-})
-
-app.get('/todolists/active', (req, res) => {
-    // const allTasks = getDataFromTable('tasks');
-    // const data = allTasks.filter(element => element.date === element.reminder);
-    // let data = allTasks[index];
-    // writeToTable('tasks', allTasks);
-    const data = getDataFromTable('tasks');
-    res.status(200).json(data);
-})
-
 app.put('/todolists/:id/completed-status', (req, res) => {
     const id = +req.params.id;
     const task = req.body;
@@ -307,10 +293,7 @@ app.put('/todolists/:id/completed-status', (req, res) => {
     let updateTask = { ...neededTask, ...task};
     allTasks[index] = updateTask;
     writeToTable('tasks', allTasks);
-    
-    res.status(200).json({updateTask});
-    
-    // res.status(200).json({ message: "Update"});
+    res.status(200).json(updateTask);
 })
 
 app.put('/todolists/:id/edit', (req,res) => {
@@ -323,11 +306,11 @@ app.put('/todolists/:id/edit', (req,res) => {
     allTasks[index] = editTask;
     const data = writeToTable('tasks', allTasks);
 
-     res.status(200).json({editTask});
+     res.status(200).json(editTask);
 })
 
 app.put('/todolists/:id/change-important-status', (req,res) => {
-    console.log(2);
+    
     const id = +req.params.id;
     const task = req.body;
     const allTasks = getDataFromTable('tasks');
@@ -335,23 +318,17 @@ app.put('/todolists/:id/change-important-status', (req,res) => {
     const index = allTasks.findIndex(element => element.id === id);
     let updateTask = { ...neededTask, ...task};
     allTasks[index] = updateTask;
-    const sortTasks = allTasks.sort((a, b) => 
-    b.important - a.important);
-    const data = writeToTable('tasks', allTasks);
-    
-    res.status(200).json({updateTask});
+    writeToTable('tasks', allTasks);
+    res.status(200).json(updateTask);
 })
-
 
 app.delete('/todolists', (req, res) => {
     const data = deleteFromTable('tasks');
     res.status(200).json({ message: "Clear"});
 })
 
-
-
 app.delete('/todolists/:id', (req, res) => {
-    console.log(4);
+    
     const id = +req.params.id;
     const allTasks = getDataFromTable('tasks');
     const neededTask = getItemByParamValue(allTasks, 'id', id);
